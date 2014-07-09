@@ -184,6 +184,10 @@ public class ImmutableSettings implements Settings {
 
     @Override
     public Settings getComponentSettings(Class component) {
+        String prefix = Configure.Eval.getPrefix(component);
+        if (prefix != Configure.NotSpecified) {
+            return getComponentSettings(prefix, component);
+        }
         if (component.getName().startsWith("org.elasticsearch")) {
             return getComponentSettings("org.elasticsearch", component);
         }

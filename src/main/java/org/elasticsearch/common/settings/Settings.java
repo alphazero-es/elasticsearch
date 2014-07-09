@@ -28,6 +28,7 @@ import org.elasticsearch.common.unit.SizeValue;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.ToXContent;
 
+import java.lang.annotation.*;
 import java.util.Map;
 
 /**
@@ -326,5 +327,34 @@ public interface Settings extends ToXContent {
          * Builds the settings.
          */
         Settings build();
+    }
+
+    // ------------------------------------------------------------------
+    // Metadata support
+    // ------------------------------------------------------------------
+
+    /** */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Configure {
+        String value() default Configure.NotSpecified;
+        /** */
+        static final String NotSpecified = "";
+        /** */
+        static final class Eval {
+            /**
+             * @param compClass class of the component
+             * @return configured Settings prefix for class (if defined),
+             *         or Settings.Configure.NotSpecified if not defined.
+             */
+            static String getPrefix(Class<?> compClass) {
+                Settings.Configure config = compClass.getAnnotation(Settings.Configure.class);
+                if (config == null) {
+                    return Configure.NotSpecified;
+                }
+                return config.value();
+            }
+        }
     }
 }
